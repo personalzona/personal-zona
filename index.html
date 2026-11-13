@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Personal Zona — Performance & Nutrition Portal</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              400: '#fb923c',
+              500: '#ff6b00',
+              600: '#ea580c',
+              700: '#c2410c',
+            },
+            obsidian: {
+              950: '#090b0e',
+              900: '#0f1217',
+              800: '#161b22',
+              700: '#1f2630',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Ottimizzazioni generali per sensazione App Nativa */
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+
+    /* Nasconde scrollbar mantenendo lo scorrimento fluido */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Effetto vetro leggero per barra superiore e inferiore */
+    .glass-bar {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Transizione morbida tra le viste */
+    .view-fade {
+      animation: fadeSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Numeri allineati per dati atletici e tabelle */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-obsidian-950 dark:text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- =====================================================================
+       TOP HEADER (Fisso, compatto, con Switch Ruolo, Sync Google Sheet e Tema)
+       ===================================================================== -->
+  <header class="sticky top-0 z-40 glass-bar bg-white/85 dark:bg-obsidian-900/85 border-b border-slate-200/80 dark:border-white/10">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+      
+      <!-- Brand Logo & Titolo -->
+      <button onclick="navigateTo('home')" class="flex items-center gap-3 text-left group focus:outline-none">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-amber-600 flex items-center justify-center shadow-lg shadow-brand-500/25 group-active:scale-95 transition-transform">
+          <!-- Monogramma vettoriale PZ pulito -->
+          <span class="text-white font-extrabold text-base tracking-tighter">PZ</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-base tracking-tight leading-none">Personal Zona</span>
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500" title="Pronto per sincronizzazione Google Sheets"></span>
+          </div>
+          <p id="headerSubtitle" class="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">Area Cliente • Dieta & Training</p>
+        </div>
+      </button>
+
+      <!-- Controlli Rapidi Destra -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- Switch Demo Ruolo Cliente / Admin -->
+        <button id="roleToggleBtn" onclick="toggleRole()" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 dark:bg-obsidian-800 dark:border-white/10 dark:text-slate-200 dark:hover:bg-obsidian-700">
+          <svg class="w-3.5 h-3.5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <span id="roleLabel">Cliente</span>
+        </button>
+
+        <!-- Pulsante Configura Google Sheet / Deploy -->
+        <button onclick="openDbModal()" class="p-2 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 hover:bg-brand-500/20 border border-brand-500/20 transition-colors" title="Collega Google Sheets e Pubblica Gratis">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+        </button>
+
+        <!-- Toggle Tema Chiaro / Scuro -->
+        <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-obsidian-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-obsidian-700 border border-slate-200 dark:border-white/10 transition-colors" title="Cambia tema">
+          <svg id="themeIconSun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="themeIconMoon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       MAIN CONTENT AREA (Contenitore dinamico delle schermate)
+       ===================================================================== -->
+  <main id="appContainer" class="flex-1 max-w-5xl w-full mx-auto px-4 pt-5 pb-28">
+    <!-- Il contenuto viene renderizzato dinamicamente via JavaScript -->
+  </main>
+
+  <!-- =====================================================================
+       BOTTOM NAVIGATION BAR (4 Tab principali come da flusso utente)
+       ===================================================================== -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 glass-bar bg-white/90 dark:bg-obsidian-900/90 border-t border-slate-200/80 dark:border-white/10 pb-safe">
+    <div class="max-w-5xl mx-auto px-2 h-16 grid grid-cols-4 gap-1">
+      <button onclick="navigateTo('home')" data-nav="home" class="nav-btn flex flex-col items-center justify-center rounded-xl transition-colors text-brand-500">
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        <span class="text-[11px] font-semibold">Home</span>
+      </button>
+
+      <button onclick="navigateTo('schede')" data-nav="schede" class="nav-btn flex flex-col items-center justify-center rounded-xl transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <span id="navSchedeLabel" class="text-[11px] font-medium">Schede</span>
+      </button>
+
+      <button onclick="navigateTo('pasti')" data-nav="pasti" class="nav-btn flex flex-col items-center justify-center rounded-xl transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+        <span class="text-[11px] font-medium">Elenco Pasti</span>
+      </button>
+
+      <button onclick="navigateTo('richieste')" data-nav="richieste" class="nav-btn flex flex-col items-center justify-center rounded-xl transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+        <span class="text-[11px] font-medium">Richieste</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- =====================================================================
+       MODAL: GUIDA COLLEGAMENTO GOOGLE SHEETS & PUBBLICAZIONE GRATUITA
+       ===================================================================== -->
+  <div id="dbModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-lg">Database Google Sheets & Pubblicazione</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">100% gratuito per sempre, multi-utente e senza badge</p>
+        </div>
+        <button onclick="closeDbModal()" class="p-2 rounded-xl bg-slate-100 dark:bg-obsidian-700 hover:bg-slate-200 dark:hover:bg-obsidian-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-5 text-sm">
+        <!-- URL Web App Apps Script -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 space-y-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-brand-500">1. Incolla URL Google Apps Script (Web App)</label>
+          <div class="flex gap-2">
+            <input id="gasUrlInput" type="url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-obsidian-800 border border-slate-300 dark:border-white/15 text-xs focus:outline-none focus:border-brand-500" />
+            <button onclick="saveGasUrl()" class="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs transition-colors">Salva</button>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Finché non inserisci l'URL, l'app funziona in modalità demo locale istantanea.</p>
+        </div>
+
+        <!-- Codice Apps Script pronto -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">2. Codice ponte per il tuo Google Sheet (Estensioni → Apps Script)</span>
+            <button onclick="copyGasCode()" class="px-3 py-1 rounded-lg bg-brand-500/15 text-brand-500 font-semibold text-xs hover:bg-brand-500/25">Copia Script</button>
+          </div>
+          <pre id="gasCodeBlock" class="p-3.5 rounded-2xl bg-obsidian-950 text-emerald-400 text-[11px] overflow-x-auto leading-relaxed border border-white/10">function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheetName = e.parameter.sheet || 'Schede';
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return jsonOut({ error: 'Foglio non trovato: ' + sheetName });
+  
+  const data = sheet.getDataRange().getValues();
+  const headers = data.shift();
+  const rows = data.map(r => {
+    let obj = {};
+    headers.forEach((h, i) => obj[h] = r[i]);
+    return obj;
+  });
+  return jsonOut({ status: 'ok', data: rows });
+}
+
+function doPost(e) {
+  // LockService evita conflitti se più utenti salvano contemporaneamente
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const payload = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(payload.sheet);
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const newRow = headers.map(h => payload.row[h] !== undefined ? payload.row[h] : '');
+    sheet.appendRow(newRow);
+    return jsonOut({ status: 'saved' });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function jsonOut(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        </div>
+
+        <!-- Guida Hosting -->
+        <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-1.5">
+          <h4 class="font-bold text-emerald-600 dark:text-emerald-400 text-xs uppercase tracking-wider">3. Pubblicazione Gratuita su GitHub Pages (Zero Crediti e Zero Badge)</h4>
+          <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            Salva questo file come <code class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">index.html</code>, crea un repository pubblico gratuito su <strong>github.com</strong>, trascina il file con <em>Add file → Upload files</em> e attiva <strong>Settings → Pages → Branch: main</strong>. Avrai un link HTTPS pulito al 100%, senza alcun logo o barra esterna, installabile su smartphone come App nativa.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       TOAST NOTIFICATION (Sostituisce alert() con feedback moderno)
+       ===================================================================== -->
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+    <div class="px-4 py-2.5 rounded-2xl bg-obsidian-800 dark:bg-white text-white dark:text-obsidian-950 text-xs font-semibold shadow-xl flex items-center gap-2 border border-white/10">
+      <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+      <span id="toastMessage">Operazione completata</span>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       JAVASCRIPT: LOGICA APPLICATIVA, STATO, CALCOLATORI E NAVIGAZIONE
+       ===================================================================== -->
+  <script>
+    /**
+     * STATO GLOBALE DELL'APPLICAZIONE
+     * Contiene i dati di esempio strutturati sui 12 moduli rilevati nei tuoi screenshot.
+     */
+    const state = {
+      currentView: 'home',
+      role: 'client', // 'client' oppure 'admin'
+      gasUrl: localStorage.getItem('pz_gas_url') || '',
+      clientName: 'Marco Rossi',
+      nextAppointment: {
+        title: 'Check Plicometria & Antropometria',
+        date: 'Venerdì 20 Nov • 17:30',
+        location: 'Studio Personal Zona / Online'
+      },
+      // Schede di allenamento
+      workouts: [
+        {
+          id: 'SCH-01',
+          day: 'Giorno A • Spinta & Core',
+          focus: 'Ipertrofia / Forza',
+          duration: '55 min',
+          exercises: [
+            { name: 'Panca Piana Bilanciere', sets: '4', reps: '6-8', rest: '120"', note: 'Fermo 1" al petto' },
+            { name: 'Spinte Manubri Inclinata 30°', sets: '3', reps: '10', rest: '90"', note: 'Controllo eccentrica' },
+            { name: 'Military Press Manubri', sets: '3', reps: '8-10', rest: '90"', note: '' },
+            { name: 'Dip alle Parallele', sets: '3', reps: 'Max', rest: '75"', note: 'Sovraccarico se >12' },
+            { name: 'Plank + Hollow Body', sets: '3', reps: '45"', rest: '45"', note: 'Addome attivo' }
+          ]
+        },
+        {
+          id: 'SCH-02',
+          day: 'Giorno B • Tirata & Posteriore',
+          focus: 'Schiena & Bicipiti',
+          duration: '50 min',
+          exercises: [
+            { name: 'Trazioni alla Sbarra', sets: '4', reps: '6-8', rest: '120"', note: 'Presa prona media' },
+            { name: 'Rematore Bilanciere', sets: '4', reps: '8', rest: '90"', note: 'Schiena neutra' },
+            { name: 'Pulley Basso Triangolo', sets: '3', reps: '12', rest: '75"', note: 'Picco contrazione 1"' },
+            { name: 'Curl Bilanciere EZ', sets: '3', reps: '10', rest: '60"', note: '' }
+          ]
+        },
+        {
+          id: 'SCH-03',
+          day: 'Giorno C • Gambe & Metabolico',
+          focus: 'Lower Body',
+          duration: '60 min',
+          exercises: [
+            { name: 'Back Squat Bilanciere', sets: '4', reps: '6', rest: '150"', note: 'Profondità parallelo' },
+            { name: 'Romanian Deadlift (RDL)', sets: '3', reps: '8-10', rest: '120"', note: 'Focus femorali' },
+            { name: 'Affondi Bulgari Manubri', sets: '3', reps: '10/lato', rest: '90"', note: '' },
+            { name: 'Calf Raise in Piedi', sets: '4', reps: '15', rest: '60"', note: '' }
+          ]
+        }
+      ],
+      selectedWorkoutIndex: 0,
+      // Piano DietaZOna (40% Carboidrati, 30% Proteine, 30% Grassi)
+      zonePlan: {
+        dailyBlocks: 14,
+        meals: [
+          { name: 'Colazione', blocks: 4, suggestion: '200g Albume + 1 Uovo intero + 60g Avena + 12g Mandorle' },
+          { name: 'Spuntino Mattina', blocks: 1, suggestion: '150g Yogurt Greco 0% + 100g Mela + 3 Noci' },
+          { name: 'Pranzo', blocks: 4, suggestion: '140g Petto di Pollo + 250g Verdure + 140g Riso Basmati + 1 cucchiaio Olio EVO' },
+          { name: 'Merenda', blocks: 1, suggestion: '30g Proteine Whey + 1 Arancia + 3 Mandorle' },
+          { name: 'Cena', blocks: 4, suggestion: '180g Salmone/Orata + Verdure grigliate + 200g Patate dolci' }
+        ]
+      },
+      // Elenco Pasti / Alimenti DietaZOna (peso per 1 blocchetto)
+      foods: [
+        { name: 'Petto di Pollo / Tacchino', macro: 'Proteine (1P = 7g)', gramsPerBlock: '30 g', category: 'Proteine' },
+        { name: 'Albume d\'Uovo', macro: 'Proteine (1P = 7g)', gramsPerBlock: '70 g', category: 'Proteine' },
+        { name: 'Filetto di Merluzzo / Orata', macro: 'Proteine (1P = 7g)', gramsPerBlock: '45 g', category: 'Proteine' },
+        { name: 'Yogurt Greco 0% Grassi', macro: 'Proteine (1P = 7g)', gramsPerBlock: '85 g', category: 'Proteine' },
+        { name: 'Avena in Fiocchi', macro: 'Carboidrati (1C = 9g)', gramsPerBlock: '15 g', category: 'Carboidrati' },
+        { name: 'Riso Basmati (peso crudo)', macro: 'Carboidrati (1C = 9g)', gramsPerBlock: '12 g', category: 'Carboidrati' },
+        { name: 'Mela / Pera / Arancia', macro: 'Carboidrati (1C = 9g)', gramsPerBlock: '90 g', category: 'Carboidrati' },
+        { name: 'Patate Dolci', macro: 'Carboidrati (1C = 9g)', gramsPerBlock: '45 g', category: 'Carboidrati' },
+        { name: 'Olio Extravergine d\'Oliva', macro: 'Grassi (1G = 3g)', gramsPerBlock: '3.3 g (1 cucchiaino)', category: 'Grassi' },
+        { name: 'Mandorle / Noci', macro: 'Grassi (1G = 3g)', gramsPerBlock: '6 g (3-4 pezzi)', category: 'Grassi' },
+        { name: 'Avocado', macro: 'Grassi (1G = 3g)', gramsPerBlock: '20 g', category: 'Grassi' }
+      ],
+      foodSearch: '',
+      foodFilter: 'Tutti',
+      // Misurazioni Plicometria & Antropometria
+      measurements: [
+        { date: '15 Set 2026', weight: 81.4, bodyFat: 16.8, waist: 86, chest: 102, arm: 36.5, thigh: 58 },
+        { date: '14 Ott 2026', weight: 79.8, bodyFat: 15.1, waist: 83.5, chest: 103, arm: 37.0, thigh: 58.5 },
+        { date: '10 Nov 2026', weight: 78.5, bodyFat: 13.9, waist: 81.5, chest: 103.5, arm: 37.4, thigh: 59 }
+      ],
+      // Integratori consigliati
+      supplements: [
+        { name: 'Omega-3 RX Alta Purezza', dose: '2.5 g EPA+DHA', timing: 'A colazione', note: 'Supporto infiammazione e DietaZOna' },
+        { name: 'Creatina Monoidrato Creapure', dose: '3 - 5 g', timing: 'Post-workout o pranzo', note: 'Forza e volume cellulare' },
+        { name: 'Magnesio Bisglicinato', dose: '300 mg', timing: '30 min prima di dormire', note: 'Recupero neuromuscolare e sonno' },
+        { name: 'Vitamina D3 + K2', dose: '2000 UI', timing: 'A pranzo (con grassi)', note: 'Sistema immunitario' }
+      ],
+      // Video caricati
+      videos: [
+        { title: 'Esecuzione Panca Piana & Arco Dorsale', category: 'Tecnica Esercizi', duration: '04:15' },
+        { title: 'Come comporre un pasto DietaZOna 40-30-30', category: 'Nutrizione', duration: '06:40' },
+        { title: 'Respirazione Diaframmatica e Bracing nello Squat', category: 'Tecnica Esercizi', duration: '05:10' },
+        { title: 'CardioZOna: Allenarsi nella fascia lipolitica', category: 'Cardio', duration: '03:50' }
+      ],
+      // Richieste Alimenti & Appuntamenti
+      requests: [
+        { type: 'Richiesta Alimento', title: 'Skyr Bianco 0% Lidl', status: 'Approvato (110g = 1P)', date: '08 Nov' },
+        { type: 'Appuntamento', title: 'Check Plicometria Mensile', status: 'Confermato • 20 Nov 17:30', date: '11 Nov' }
+      ]
+    };
+
+    /**
+     * NAVIGAZIONE TRA LE SCHERMATE
+     */
+    function navigateTo(view) {
+      state.currentView = view;
+      updateBottomNav();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateBottomNav() {
+      const mainTabs = ['home', 'schede', 'pasti', 'richieste'];
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const target = btn.getAttribute('data-nav');
+        if (target === state.currentView) {
+          btn.classList.remove('text-slate-500', 'dark:text-slate-400');
+          btn.classList.add('text-brand-500');
+        } else {
+          btn.classList.remove('text-brand-500');
+          btn.classList.add('text-slate-500', 'dark:text-slate-400');
+        }
+      });
+    }
+
+    /**
+     * SWITCH RUOLO CLIENTE / ADMIN (Mostra come cambia l'app per te vs clienti)
+     */
+    function toggleRole() {
+      state.role = state.role === 'client' ? 'admin' : 'client';
+      const isAdmin = state.role === 'admin';
+      
+      document.getElementById('roleLabel').textContent = isAdmin ? 'Admin Coach' : 'Cliente';
+      document.getElementById('headerSubtitle').textContent = isAdmin 
+        ? 'Modalità Admin • Gestione Clienti' 
+        : 'Area Cliente • Dieta & Training';
+      document.getElementById('navSchedeLabel').textContent = isAdmin ? 'Crea Scheda' : 'Schede';
+      
+      showToast(isAdmin ? 'Modalità Admin attivata: puoi creare schede e inserire misure' : 'Vista Cliente attivata');
+      render();
+    }
+
+    /**
+     * TEMA CHIARO / SCURO
+     */
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    /**
+     * TOAST MESSAGE (No alert!)
+     */
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      toast.classList.remove('opacity-0', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0', '-translate-y-2');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2800);
+    }
+
+    /**
+     * MODAL DATABASE GOOGLE SHEETS
+     */
+    function openDbModal() {
+      document.getElementById('gasUrlInput').value = state.gasUrl;
+      const modal = document.getElementById('dbModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDbModal() {
+      const modal = document.getElementById('dbModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveGasUrl() {
+      const val = document.getElementById('gasUrlInput').value.trim();
+      state.gasUrl = val;
+      localStorage.setItem('pz_gas_url', val);
+      closeDbModal();
+      showToast(val ? 'Endpoint Google Sheets salvato!' : 'Modalità demo locale ripristinata');
+    }
+
+    function copyGasCode() {
+      const code = document.getElementById('gasCodeBlock').innerText;
+      const ta = document.createElement('textarea');
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Codice Google Apps Script copiato negli appunti');
+    }
+
+    /**
+     * COMPONENTE HEADER INTERNO CON TASTO INDIETRO (Per sotto-schermate)
+     */
+    function subViewHeader(title, subtitle) {
+      return `
+        <div class="flex items-center gap-3 mb-5">
+          <button onclick="navigateTo('home')" class="p-2.5 rounded-2xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <div>
+            <h1 class="text-xl font-extrabold tracking-tight">${title}</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">${subtitle}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * RENDERING PRINCIPALE DELLE VISTE
+     */
+    function render() {
+      const container = document.getElementById('appContainer');
+      const latest = state.measurements[state.measurements.length - 1];
+
+      // 1. SCHERMATA HOME (La nuova Dashboard che sostituisce la griglia AppSheet)
+      if (state.currentView === 'home') {
+        container.innerHTML = `
+          <div class="view-fade space-y-6">
+            
+            <!-- BANNER BENVENUTO & PROSSIMO APPUNTAMENTO -->
+            <div class="p-5 rounded-3xl bg-gradient-to-br from-obsidian-800 to-obsidian-900 text-white border border-white/10 shadow-xl relative overflow-hidden">
+              <div class="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-brand-500/20 blur-2xl pointer-events-none"></div>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                <div>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-500/20 text-brand-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                    ${state.role === 'admin' ? 'Pannello Coach Attivo' : 'Programma Attivo'}
+                  </span>
+                  <h1 class="text-2xl font-extrabold tracking-tight">Ciao, ${state.role === 'admin' ? 'Coach' : state.clientName}</h1>
+                  <p class="text-xs text-slate-300 mt-1">Peso attuale: <strong class="text-white tabular-nums">${latest.weight} kg</strong> • Massa Grassa: <strong class="text-brand-400 tabular-nums">${latest.bodyFat}%</strong></p>
+                </div>
+
+                <!-- Card Appuntamento Rapido -->
+                <button onclick="navigateTo('appuntamenti')" class="flex items-center gap-3 p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-left transition-all">
+                  <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                  <div>
+                    <p class="text-[10px] uppercase tracking-wider font-bold text-brand-400">Prossimo Appuntamento</p>
+                    <p class="text-xs font-bold text-white mt-0.5">${state.nextAppointment.title}</p>
+                    <p class="text-[11px] text-slate-300">${state.nextAppointment.date}</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- AZIONI PRINCIPALI QUOTIDIANE (2 Card grandi ad alta priorità) -->
+            <div>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-1">Attività Quotidiane</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                
+                <!-- Card 1: Schede Allenamento -->
+                <button onclick="navigateTo('schede')" class="group p-5 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/60 text-left transition-all shadow-sm flex items-center justify-between">
+                  <div class="space-y-1.5">
+                    <div class="w-11 h-11 rounded-2xl bg-brand-500/15 text-brand-500 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    </div>
+                    <h3 class="font-bold text-base">${state.role === 'admin' ? 'Schede & Crea Scheda' : 'Schede Allenamento'}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">3 sedute attive • ${state.workouts[0].day.split('•')[0]}</p>
+                  </div>
+                  <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+
+                <!-- Card 2: DietaZOna -->
+                <button onclick="navigateTo('dietazona')" class="group p-5 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/60 text-left transition-all shadow-sm flex items-center justify-between">
+                  <div class="space-y-1.5">
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                    </div>
+                    <h3 class="font-bold text-base">DietaZOna (40·30·30)</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Piano da <strong class="text-slate-700 dark:text-slate-200">${state.zonePlan.dailyBlocks} blocchi</strong> • Equilibrio ormonale</p>
+                  </div>
+                  <svg class="w-5 h-5 text-slate-400 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+
+              </div>
+            </div>
+
+            <!-- GRUPPO 2: ANALISI CORPOREA & PROGRESSI -->
+            <div>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-1">Analisi Corporea & Risultati</h2>
+              <div class="grid grid-cols-3 gap-3">
+                
+                <button onclick="navigateTo('plicometria')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 text-left transition-all flex flex-col justify-between">
+                  <div class="w-9 h-9 rounded-xl bg-orange-500/15 text-orange-500 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-xs sm:text-sm">Plicometria</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Body Fat ${latest.bodyFat}%</p>
+                  </div>
+                </button>
+
+                <button onclick="navigateTo('antropometria')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 text-left transition-all flex flex-col justify-between">
+                  <div class="w-9 h-9 rounded-xl bg-sky-500/15 text-sky-500 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-xs sm:text-sm">Antropometria</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Vita ${latest.waist} cm</p>
+                  </div>
+                </button>
+
+                <button onclick="navigateTo('progressi')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 text-left transition-all flex flex-col justify-between">
+                  <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-xs sm:text-sm">Progressi</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Grafici & Storico</p>
+                  </div>
+                </button>
+
+              </div>
+            </div>
+
+            <!-- GRUPPO 3: CALCOLATORI & STRUMENTI TECNICI -->
+            <div>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 px-1">Strumenti & Calcolatori</h2>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                
+                <button onclick="navigateTo('calcolomax')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 text-left transition-all">
+                  <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center mb-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                  </div>
+                  <h3 class="font-bold text-xs sm:text-sm">Calcolo Max</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Stima 1RM & carichi</p>
+                </button>
+
+                <button onclick="navigateTo('cardiozona')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 text-left transition-all">
+                  <div class="w-9 h-9 rounded-xl bg-red-500/15 text-red-500 flex items-center justify-center mb-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                  </div>
+                  <h3 class="font-bold text-xs sm:text-sm">CardioZOna</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Fasce FC target</p>
+                </button>
+
+                <button onclick="navigateTo('integratori')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 text-left transition-all">
+                  <div class="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-500 flex items-center justify-center mb-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                  </div>
+                  <h3 class="font-bold text-xs sm:text-sm">Integratori</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Protocollo attivo</p>
+                </button>
+
+                <button onclick="navigateTo('video')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 text-left transition-all">
+                  <div class="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center mb-2.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  </div>
+                  <h3 class="font-bold text-xs sm:text-sm">Video Caricati</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Tutorial & Esecuzioni</p>
+                </button>
+
+              </div>
+            </div>
+
+            <!-- GRUPPO 4: SUPPORTO, RICHIESTE & SITO WEB (Azioni rapide compatte) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <button onclick="navigateTo('appuntamenti')" class="p-3.5 rounded-2xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 flex items-center gap-3 text-left transition-all">
+                <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-obsidian-700 flex items-center justify-center text-brand-500 shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                  <h4 class="font-bold text-xs">Appuntamenti</h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">Prenota o gestisci check</p>
+                </div>
+              </button>
+
+              <button onclick="navigateTo('richieste')" class="p-3.5 rounded-2xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 flex items-center gap-3 text-left transition-all">
+                <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-obsidian-700 flex items-center justify-center text-brand-500 shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+                <div>
+                  <h4 class="font-bold text-xs">Richiesta Alimenti</h4>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">Chiedi inserimento cibo</p>
+                </div>
+              </button>
+
+              <button onclick="showToast('Apertura sito web ufficiale Personal Zona...')" class="p-3.5 rounded-2xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/50 flex items-center justify-between text-left transition-all">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-obsidian-700 flex items-center justify-center text-brand-500 shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-xs">Sito WEB</h4>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Portale Personal Zona</p>
+                  </div>
+                </div>
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </button>
+            </div>
+
+          </div>
+        `;
+        return;
+      }
+
+      // 2. SCHEDE ALLENAMENTO & CREA SCHEDA (ADMIN)
+      if (state.currentView === 'schede') {
+        const activeW = state.workouts[state.selectedWorkoutIndex] || state.workouts[0];
+        container.innerHTML = `
+          <div class="view-fade">
+            ${subViewHeader(
+              state.role === 'admin' ? 'Gestione & Crea Scheda' : 'Le Tue Schede',
+              'Seleziona la seduta di allenamento del giorno'
+            )}
+
+            <!-- Selettore Giorni -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-4">
+              ${state.workouts.map((w, idx) => `
+                <button onclick="selectWorkout(${idx})" class="px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap border transition-all ${
+                  idx === state.selectedWorkoutIndex
+                    ? 'bg-brand-500 text-white border-brand-500 shadow-lg shadow-brand-500/20'
+                    : 'bg-white dark:bg-obsidian-800 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300'
+                }">
+                  ${w.day}
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- Dettaglio Seduta Selezionata -->
+            <div class="p-5 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+                <div>
+                  <h2 class="font-extrabold text-base">${activeW.day}</h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Focus: ${activeW.focus} • Durata stimata: ${activeW.duration}</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-brand-500/15 text-brand-500 text-xs font-bold">${activeW.exercises.length} Esercizi</span>
+              </div>
+
+              <div class="space-y-2.5">
+                ${activeW.exercises.map((ex, i) => `
+                  <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200/70 dark:border-white/5 flex items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                      <span class="w-6 h-6 rounded-lg bg-brand-500/15 text-brand-500 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
+                      <div>
+                        <h4 class="font-bold text-sm">${ex.name}</h4>
+                        ${ex.note ? `<p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${ex.note}</p>` : ''}
+                      </div>
+                    </div>
+                    <div class="text-right shrink-0 tabular-nums">
+                      <span class="inline-block px-2.5 py-1 rounded-xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 text-xs font-extrabold">
+                        ${ex.sets} × ${ex.reps}
+                      </span>
+                      <p class="text-[10px] text-slate-400 mt-1">Rec. ${ex.rest}</p>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Modulo rapido Admin: Aggiungi Esercizio alla Scheda -->
+            ${state.role === 'admin' ? `
+              <div class="mt-5 p-5 rounded-3xl bg-brand-500/5 border border-brand-500/30 space-y-3">
+                <h3 class="font-bold text-sm text-brand-500 flex items-center gap-2">
+                  <span>+ Aggiungi Esercizio (Modalità Admin)</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                  <input id="newExName" type="text" placeholder="Nome esercizio (es. Lat Machine)" class="sm:col-span-2 px-3.5 py-2.5 rounded-xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 text-xs" />
+                  <input id="newExSets" type="text" placeholder="Serie x Reps (es. 4x10)" class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 text-xs" />
+                  <button onclick="addExerciseToWorkout()" class="px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-colors">Salva su Foglio</button>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+        return;
+      }
+
+      // 3. DIETAZONA (40-30-30)
+      if (state.currentView === 'dietazona') {
+        container.innerHTML = `
+          <div class="view-fade space-y-5">
+            ${subViewHeader('DietaZOna 40·30·30', 'Distribuzione giornaliera dei blocchi ed equilibrio ormonale')}
+
+            <!-- Riepilogo Macro -->
+            <div class="grid grid-cols-3 gap-3">
+              <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 text-center">
+                <span class="text-xs font-bold text-brand-500">40%</span>
+                <p class="font-extrabold text-lg tabular-nums mt-0.5">${state.zonePlan.dailyBlocks * 9}g</p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Carboidrati</p>
+              </div>
+              <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 text-center">
+                <span class="text-xs font-bold text-emerald-500">30%</span>
+                <p class="font-extrabold text-lg tabular-nums mt-0.5">${state.zonePlan.dailyBlocks * 7}g</p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Proteine</p>
+              </div>
+              <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 text-center">
+                <span class="text-xs font-bold text-amber-500">30%</span>
+                <p class="font-extrabold text-lg tabular-nums mt-0.5">${state.zonePlan.dailyBlocks * 3}g</p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Grassi Sani</p>
+              </div>
+            </div>
+
+            <!-- Suddivisione Pasti -->
+            <div class="space-y-3">
+              ${state.zonePlan.meals.map(m => `
+                <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 class="font-bold text-sm">${m.name}</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">${m.suggestion}</p>
+                  </div>
+                  <span class="px-3 py-1.5 rounded-2xl bg-brand-500/15 text-brand-500 font-extrabold text-xs shrink-0 tabular-nums">
+                    ${m.blocks} Blocchi
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+
+            <button onclick="navigateTo('pasti')" class="w-full py-3.5 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs shadow-lg shadow-brand-500/20 transition-all">
+              Apri Tabella Equivalenze Alimenti (1 Blocco) →
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      // 4. ELENCO PASTI / ALIMENTI ZONA
+      if (state.currentView === 'pasti') {
+        const filteredFoods = state.foods.filter(f => {
+          const matchesSearch = f.name.toLowerCase().includes(state.foodSearch.toLowerCase());
+          const matchesCat = state.foodFilter === 'Tutti' || f.category === state.foodFilter;
+          return matchesSearch && matchesCat;
+        });
+
+        container.innerHTML = `
+          <div class="view-fade space-y-4">
+            ${subViewHeader('Elenco Pasti & Alimenti', 'Grammature esatte per comporre 1 blocchetto Zona')}
+
+            <!-- Ricerca Istantanea -->
+            <div class="relative">
+              <input type="text" value="${state.foodSearch}" oninput="updateFoodSearch(this.value)" placeholder="Cerca alimento (es. Pollo, Riso, Mandorle...)" class="w-full pl-10 pr-4 py-3 rounded-2xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 text-xs focus:outline-none focus:border-brand-500" />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+
+            <!-- Filtri Categoria -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar">
+              ${['Tutti', 'Proteine', 'Carboidrati', 'Grassi'].map(cat => `
+                <button onclick="setFoodFilter('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  state.foodFilter === cat
+                    ? 'bg-brand-500 text-white border-brand-500'
+                    : 'bg-white dark:bg-obsidian-800 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300'
+                }">${cat}</button>
+              `).join('')}
+            </div>
+
+            <!-- Lista Risultati -->
+            <div class="space-y-2">
+              ${filteredFoods.map(f => `
+                <div class="p-3.5 rounded-2xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 flex items-center justify-between">
+                  <div>
+                    <h4 class="font-bold text-sm">${f.name}</h4>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">${f.macro}</p>
+                  </div>
+                  <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-obsidian-700 font-extrabold text-xs text-brand-500 tabular-nums">
+                    ${f.gramsPerBlock}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 5. CALCOLO MAX (1RM INTERATTIVO)
+      if (state.currentView === 'calcolomax') {
+        container.innerHTML = `
+          <div class="view-fade space-y-5">
+            ${subViewHeader('Calcolo Max (1RM)', 'Stima il massimale e le percentuali di carico allenante')}
+
+            <div class="p-5 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">Carico Sollevato (kg)</label>
+                  <input id="rmWeight" type="number" value="80" oninput="calculate1RM()" class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 font-extrabold text-base tabular-nums focus:outline-none focus:border-brand-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">Ripetizioni Eseguite</label>
+                  <input id="rmReps" type="number" value="6" min="1" max="20" oninput="calculate1RM()" class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 font-extrabold text-base tabular-nums focus:outline-none focus:border-brand-500" />
+                </div>
+              </div>
+
+              <div id="rmResultBox" class="p-4 rounded-2xl bg-brand-500/10 border border-brand-500/20 text-center">
+                <!-- Popolato via JS -->
+              </div>
+
+              <div id="rmTable" class="grid grid-cols-3 gap-2 pt-1">
+                <!-- Popolato via JS -->
+              </div>
+            </div>
+          </div>
+        `;
+        calculate1RM();
+        return;
+      }
+
+      // 6. CARDIOZONA (FASCE FREQUENZA CARDIACA)
+      if (state.currentView === 'cardiozona') {
+        container.innerHTML = `
+          <div class="view-fade space-y-5">
+            ${subViewHeader('CardioZOna', 'Calcolo fasce cardiache ottimali (Formula di Tanaka/Karvonen)')}
+
+            <div class="p-5 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">Età (anni)</label>
+                  <input id="czAge" type="number" value="34" oninput="calculateCardio()" class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 font-extrabold text-base tabular-nums focus:outline-none focus:border-brand-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">FC a Riposo (bpm)</label>
+                  <input id="czRest" type="number" value="62" oninput="calculateCardio()" class="w-full px-3.5 py-3 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 font-extrabold text-base tabular-nums focus:outline-none focus:border-brand-500" />
+                </div>
+              </div>
+
+              <div id="czZonesList" class="space-y-2.5">
+                <!-- Popolato via JS -->
+              </div>
+            </div>
+          </div>
+        `;
+        calculateCardio();
+        return;
+      }
+
+      // 7. PLICOMETRIA, ANTROPOMETRIA & PROGRESSI
+      if (['plicometria', 'antropometria', 'progressi'].includes(state.currentView)) {
+        const titles = {
+          plicometria: ['Plicometria & Body Fat', 'Andamento percentuale massa grassa e massa magra'],
+          antropometria: ['Antropometria', 'Storico circonferenze corporee in centimetri'],
+          progressi: ['Progressi Generali', 'Riepilogo evoluzione peso e composizione corporea']
+        };
+        const [t, sub] = titles[state.currentView];
+
+        container.innerHTML = `
+          <div class="view-fade space-y-5">
+            ${subViewHeader(t, sub)}
+
+            <!-- Card Riassunto Ultima Rilevazione -->
+            <div class="grid grid-cols-3 gap-3">
+              <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10">
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Peso Corporeo</p>
+                <p class="text-xl font-extrabold tabular-nums mt-1">${latest.weight} <span class="text-xs font-normal">kg</span></p>
+                <span class="text-[11px] font-bold text-emerald-500">-2.9 kg</span>
+              </div>
+              <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10">
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Body Fat %</p>
+                <p class="text-xl font-extrabold text-brand-500 tabular-nums mt-1">${latest.bodyFat}%</p>
+                <span class="text-[11px] font-bold text-emerald-500">-2.9%</span>
+              </div>
+              <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10">
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Girovita</p>
+                <p class="text-xl font-extrabold tabular-nums mt-1">${latest.waist} <span class="text-xs font-normal">cm</span></p>
+                <span class="text-[11px] font-bold text-emerald-500">-4.5 cm</span>
+              </div>
+            </div>
+
+            <!-- Storico Tabellare Pulito -->
+            <div class="p-5 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 space-y-3">
+              <h3 class="font-bold text-sm">Storico Rilevazioni</h3>
+              <div class="space-y-2">
+                ${state.measurements.slice().reverse().map(m => `
+                  <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200/70 dark:border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span class="font-bold text-brand-500">${m.date}</span>
+                    <div class="flex gap-3 tabular-nums font-medium">
+                      <span>Peso: <strong>${m.weight}kg</strong></span>
+                      <span>BF: <strong>${m.bodyFat}%</strong></span>
+                      <span>Vita: <strong>${m.waist}cm</strong></span>
+                      <span>Braccio: <strong>${m.arm}cm</strong></span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 8. INTEGRATORI
+      if (state.currentView === 'integratori') {
+        container.innerHTML = `
+          <div class="view-fade space-y-4">
+            ${subViewHeader('Protocollo Integratori', 'Dosaggi e tempistiche consigliate dal tuo coach')}
+            ${state.supplements.map(s => `
+              <div class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="font-bold text-sm">${s.name}</h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${s.note}</p>
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="px-2.5 py-1 rounded-xl bg-brand-500/15 text-brand-500 font-extrabold text-xs">${s.dose}</span>
+                  <p class="text-[11px] text-slate-400 mt-1">${s.timing}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        return;
+      }
+
+      // 9. VIDEO CARICATI
+      if (state.currentView === 'video') {
+        container.innerHTML = `
+          <div class="view-fade space-y-4">
+            ${subViewHeader('Video Caricati', 'Libreria tutorial esercizi e guide DietaZOna')}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              ${state.videos.map(v => `
+                <button onclick="showToast('Riproduzione: ${v.title}')" class="p-4 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 hover:border-brand-500/60 text-left transition-all flex items-center gap-3.5">
+                  <div class="w-12 h-12 rounded-2xl bg-brand-500/15 text-brand-500 flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-brand-500">${v.category} • ${v.duration}</span>
+                    <h3 class="font-bold text-sm mt-0.5 leading-snug">${v.title}</h3>
+                  </div>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 10. APPUNTAMENTI & RICHIESTE / CONTATTI
+      if (state.currentView === 'richieste' || state.currentView === 'appuntamenti') {
+        container.innerHTML = `
+          <div class="view-fade space-y-5">
+            ${subViewHeader('Contatti, Appuntamenti & Richieste', 'Invia una richiesta alimento o prenota un check')}
+
+            <!-- Form Rapido -->
+            <div class="p-5 rounded-3xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 space-y-3">
+              <h3 class="font-bold text-sm">Nuova Richiesta al Coach</h3>
+              <select id="reqType" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs font-semibold">
+                <option value="Richiesta Alimento">Richiesta Alimento (Calcolo Blocchi Zona)</option>
+                <option value="Appuntamento">Richiesta Appuntamento / Check</option>
+                <option value="Contatto Coach">Messaggio Diretto al Coach</option>
+              </select>
+              <input id="reqText" type="text" placeholder="Scrivi qui (es. Vorrei inserire Bresaola di Tacchino...)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs" />
+              <button onclick="submitRequest()" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-colors">
+                Invia Richiesta
+              </button>
+            </div>
+
+            <!-- Storico Richieste -->
+            <div class="space-y-2.5">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-1">Le tue richieste recenti</h3>
+              ${state.requests.map(r => `
+                <div class="p-4 rounded-2xl bg-white dark:bg-obsidian-800 border border-slate-200 dark:border-white/10 flex items-center justify-between gap-2">
+                  <div>
+                    <span class="text-[10px] font-bold uppercase text-brand-500">${r.type} • ${r.date}</span>
+                    <h4 class="font-bold text-sm mt-0.5">${r.title}</h4>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-500 text-[11px] font-bold shrink-0">${r.status}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    /**
+     * FUNZIONI INTERATTIVE PER SCHEDE, RICERCA, CALCOLATORI E FORM
+     */
+    function selectWorkout(idx) {
+      state.selectedWorkoutIndex = idx;
+      render();
+    }
+
+    function addExerciseToWorkout() {
+      const name = document.getElementById('newExName').value.trim();
+      const setsReps = document.getElementById('newExSets').value.trim() || '3x10';
+      if (!name) {
+        showToast('Inserisci il nome dell\'esercizio');
+        return;
+      }
+      const [sets, reps] = setsReps.toLowerCase().split('x');
+      state.workouts[state.selectedWorkoutIndex].exercises.push({
+        name,
+        sets: sets || '3',
+        reps: reps || '10',
+        rest: '90"',
+        note: 'Aggiunto da Admin'
+      });
+      showToast('Esercizio aggiunto alla scheda!');
+      render();
+    }
+
+    function updateFoodSearch(val) {
+      state.foodSearch = val;
+      render();
+    }
+
+    function setFoodFilter(cat) {
+      state.foodFilter = cat;
+      render();
+    }
+
+    function calculate1RM() {
+      const w = parseFloat(document.getElementById('rmWeight')?.value) || 0;
+      const r = parseInt(document.getElementById('rmReps')?.value) || 1;
+      // Formula di Brzycki
+      const oneRM = r === 1 ? w : Math.round(w / (1.0278 - 0.0278 * r));
+      
+      const box = document.getElementById('rmResultBox');
+      const table = document.getElementById('rmTable');
+      if (!box || !table) return;
+
+      box.innerHTML = `
+        <p class="text-[11px] uppercase tracking-wider font-bold text-brand-500">Massimale Stimato (1RM)</p>
+        <p class="text-3xl font-extrabold tabular-nums mt-1">${oneRM} <span class="text-sm font-semibold">kg</span></p>
+      `;
+
+      const percents = [95, 90, 85, 80, 75, 70];
+      table.innerHTML = percents.map(p => `
+        <div class="p-2.5 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200/70 dark:border-white/5 text-center tabular-nums">
+          <span class="text-[11px] font-bold text-slate-400">${p}%</span>
+          <p class="font-extrabold text-sm mt-0.5">${Math.round(oneRM * (p / 100))} kg</p>
+        </div>
+      `).join('');
+    }
+
+    function calculateCardio() {
+      const age = parseInt(document.getElementById('czAge')?.value) || 30;
+      const rest = parseInt(document.getElementById('czRest')?.value) || 60;
+      const fcMax = Math.round(208 - 0.7 * age);
+      const fcRes = fcMax - rest;
+
+      const zones = [
+        { name: 'Zona 1 • Recupero Attivo', min: 0.5, max: 0.6, color: 'text-sky-500' },
+        { name: 'Zona 2 • CardioZOna Lipolitica', min: 0.6, max: 0.7, color: 'text-emerald-500' },
+        { name: 'Zona 3 • Aerobica Resistenza', min: 0.7, max: 0.8, color: 'text-brand-500' },
+        { name: 'Zona 4 • Soglia Anaerobica', min: 0.8, max: 0.9, color: 'text-rose-500' }
+      ];
+
+      const list = document.getElementById('czZonesList');
+      if (!list) return;
+
+      list.innerHTML = `
+        <div class="p-3 rounded-2xl bg-brand-500/10 text-xs font-bold text-brand-500 text-center">
+          FC Max Teorica: ${fcMax} bpm
+        </div>
+        ${zones.map(z => {
+          const low = Math.round(rest + fcRes * z.min);
+          const high = Math.round(rest + fcRes * z.max);
+          return `
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-obsidian-900 border border-slate-200/70 dark:border-white/5 flex items-center justify-between">
+              <span class="font-bold text-xs ${z.color}">${z.name}</span>
+              <span class="font-extrabold text-sm tabular-nums">${low} - ${high} <span class="text-[11px] font-normal text-slate-400">bpm</span></span>
+            </div>
+          `;
+        }).join('')}
+      `;
+    }
+
+    function submitRequest() {
+      const type = document.getElementById('reqType').value;
+      const text = document.getElementById('reqText').value.trim();
+      if (!text) {
+        showToast('Scrivi i dettagli della richiesta prima di inviare');
+        return;
+      }
+      state.requests.unshift({
+        type,
+        title: text,
+        status: 'Inviata al Coach',
+        date: 'Oggi'
+      });
+      showToast('Richiesta inviata!');
+      render();
+    }
+
+    // Avvio iniziale al caricamento pagina
+    window.onload = function() {
+      render();
+    };
+  </script>
+</body>
+</html>
